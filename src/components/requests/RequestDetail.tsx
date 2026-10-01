@@ -52,6 +52,7 @@ export function RequestDetail({ id, justCreated }: { id: string; justCreated: bo
   const [noteText, setNoteText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [summary, setSummary] = useState<{ text?: string; error?: string; loading: boolean }>();
   const [notice, setNotice] = useState<string | undefined>(justCreated ? "Request created." : undefined);
 
   useEffect(() => {
@@ -120,6 +121,16 @@ export function RequestDetail({ id, justCreated }: { id: string; justCreated: bo
         setNotice("Note added.");
       },
     );
+  }
+
+  async function generateSummary() {
+    setSummary({ loading: true });
+    try {
+      const { summary: text } = await api<{ summary: string }>(`/api/requests/${id}/summary`, { method: "POST" });
+      setSummary({ text, loading: false });
+    } catch (err) {
+      setSummary({ error: (err as Error).message, loading: false });
+    }
   }
 
   function remove() {
@@ -312,6 +323,23 @@ export function RequestDetail({ id, justCreated }: { id: string; justCreated: bo
             Add note
           </button>
         </form>
+      </section>
+
+      <section className={card}>
+        <h2 className="mb-3 font-semibold">AI summary</h2>
+        {summary?.text && <p className="mb-3 whitespace-pre-wrap text-sm">{summary.text}</p>}
+        {summary?.error && (
+          <p role="alert" className="mb-3 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-900 ring-1 ring-rose-200">
+            {summary.error}
+          </p>
+        )}
+        <button
+          onClick={generateSummary}
+          disabled={summary?.loading}
+          className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-60"
+        >
+          {summary?.loading ? "Generating…" : summary?.text ? "Regenerate summary" : "Generate summary"}
+        </button>
       </section>
     </div>
   );
