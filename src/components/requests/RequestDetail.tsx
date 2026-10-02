@@ -267,7 +267,7 @@ export function RequestDetail({ id, justCreated }: { id: string; justCreated: bo
                   Refund amount (INR)
                 </label>
                 <div className="relative">
-                  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center px-3 font-semibold text-[#1a1a1a]" aria-hidden="true">
+                  <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center justify-center pl-4 text-base font-bold text-[#1a1a1a]" aria-hidden="true">
                     ₹
                   </span>
                   <input
@@ -278,7 +278,7 @@ export function RequestDetail({ id, justCreated }: { id: string; justCreated: bo
                     step="0.01"
                     value={refund}
                     onChange={(e) => setRefund(e.target.value)}
-                    className={`${field} pl-10`}
+                    className="field pl-9"
                     placeholder="0.00"
                   />
                 </div>

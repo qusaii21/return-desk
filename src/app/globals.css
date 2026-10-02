@@ -64,11 +64,13 @@ textarea:focus-visible {
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   background: var(--surface);
+  background-clip: padding-box;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   color: var(--ink);
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 4px rgb(0 0 0 / 3%);
+  position: relative;
 }
 
 .field::placeholder {
@@ -80,6 +82,7 @@ textarea:focus-visible {
   box-shadow: 0 0 0 4px rgb(247 197 45 / 15%), 0 4px 12px rgb(0 0 0 / 8%);
   outline: none;
   transform: translateY(-1px);
+  z-index: 10;
 }
 
 .field:hover:not(:focus) {
@@ -97,10 +100,19 @@ select.field {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
 }
 
 select.field:focus {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23F7C52D' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  z-index: 10;
+}
+
+/* Remove browser default dropdown arrow */
+select.field::-ms-expand {
+  display: none;
 }
 
 /* Option styling */
@@ -108,16 +120,11 @@ select.field option {
   padding: 0.5rem 1rem;
   background: white;
   color: #1a1a1a;
+  font-weight: normal;
 }
 
-select.field option:hover {
-  background: #f8f9fa;
-}
-
-select.field option:checked {
-  background: #F7C52D;
-  color: #1a1a1a;
-  font-weight: 600;
+select.field option:disabled {
+  color: #9ca3af;
 }
 
 /* Textarea Styling */
