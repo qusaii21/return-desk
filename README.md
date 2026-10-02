@@ -93,7 +93,7 @@ Updates match on the status that was just checked, so a request that changes bet
 - **Resolution and refund are only set through the transition call** that approves the request.
 - **Removed requests return 404**, the same as ones that never existed.
 - **Status codes:** state conflicts are 409, bad resolution or refund data is 422, malformed input is 400.
-- **Refund currency** is shown as USD. The brief does not say.
+- **Refund currency** is shown as INR, matching the product context.
 - **History is notes only.** Status changes are not logged.
 - No authentication, since the brief does not ask for it.
 

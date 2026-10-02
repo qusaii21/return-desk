@@ -4,5 +4,14 @@ export const formatDate = (iso: string) =>
 export const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 
-export const formatMoney = (amount: number) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
+export const formatMoney = (amount: number) => {
+  const formatted = new Intl.NumberFormat("en-IN", { 
+    style: "currency", 
+    currency: "INR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2 
+  }).format(amount);
+  
+  // Ensure proper rupee symbol display
+  return formatted.replace(/^INR\s?/, '₹ ');
+};
