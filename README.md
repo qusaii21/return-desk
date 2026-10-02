@@ -15,7 +15,7 @@ Needs Node 20+ and a PostgreSQL database.
 
 ```bash
 npm install
-cp .env.example .env        # set DATABASE_URL (and optionally GEMINI_API_KEY)
+cp .env.example .env        # set DATABASE_URL
 npx prisma migrate deploy   # builds the schema on an empty database
 npm run db:seed             # 38 visible requests + 2 removed ones
 npm run dev                 # http://localhost:3000
@@ -28,8 +28,6 @@ npm run dev                 # http://localhost:3000
 | Name | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | yes | PostgreSQL connection string |
-| `GEMINI_API_KEY` | no | Enables the AI summary on the request page. Server-side only. |
-| `GEMINI_MODEL` | no | Overrides the default `gemini-flash-latest` |
 
 ## Architecture
 
@@ -39,7 +37,6 @@ src/lib/request-rules.ts   All business rules and the transition table
 src/lib/validation.ts      Zod schemas for every input
 src/lib/errors.ts          One wrapper that turns any failure into the JSON error shape
 src/lib/requests.ts        Row to JSON mapping and the "find a live request" lookup
-src/lib/gemini.ts          The only code that talks to Gemini
 src/components/requests/   List, form, detail view, status badge
 prisma/                    schema, hand-written migration SQL, seed script
 tests/api.test.ts          Black-box API tests of the business rules
@@ -68,7 +65,6 @@ The UI reads the same `TRANSITIONS`, `isLocked` and `canRemove` from `request-ru
 | `DELETE /api/requests/:id` | Soft delete | 204 |
 | `POST /api/requests/:id/notes` | Add a note | 201 |
 | `POST /api/requests/:id/transition` | `{ status, resolution?, refundAmount? }` | 200 |
-| `POST /api/requests/:id/summary` | Optional AI summary | 200 |
 
 Errors always look like `{ "error": { "code": "...", "message": "...", "details": {...} } }`.
 
@@ -78,7 +74,6 @@ Errors always look like `{ "error": { "code": "...", "message": "...", "details"
 | 404 | `REQUEST_NOT_FOUND` (also for removed requests), `ROUTE_NOT_FOUND` |
 | 409 | `INVALID_STATUS_TRANSITION`, `DUPLICATE_LIVE_REQUEST`, `REQUEST_LOCKED`, `REMOVAL_NOT_ALLOWED`, `REQUEST_CHANGED` |
 | 422 | `INVALID_RESOLUTION`, `INVALID_REFUND_AMOUNT` |
-| 502 / 503 | `AI_UNAVAILABLE`, `AI_NOT_CONFIGURED` (summary only) |
 
 ## Business rules
 
@@ -102,18 +97,12 @@ Updates match on the status that was just checked, so a request that changes bet
 - **History is notes only.** Status changes are not logged.
 - No authentication, since the brief does not ask for it.
 
-## AI summary (optional extra)
-
-A "Generate summary" button on the request page sends the request and its notes to Gemini through a small server-side function and shows a short summary. Nothing else depends on it. Without `GEMINI_API_KEY` it returns 503 and the rest of the app works normally.
-
 ## Verification and known limitations
 
-Checked locally on PostgreSQL 16: all 15 API tests pass against the dev server and the production build, the migration applies to an empty database, the seed gives 38 visible requests across every status and reason, `tsc`, `eslint` and `next build` are clean, and the UI was exercised in a headless browser at 1280px and 375px.
+Checked against the Supabase PostgreSQL database: all 15 API tests pass against the dev server and the production build, the migration reports no pending changes, the seed gives 38 visible requests across every status and reason, `tsc`, `eslint` and `next build` are clean.
 
 Not verified or not done:
 
-- The migration SQL is hand-written because Prisma's engine could not be downloaded in my environment. I applied it with `psql` but have not run `prisma migrate deploy` myself.
-- The Gemini call has not been tested against the real API.
 - Not deployed yet (see top).
 - An unsupported HTTP method on an existing route returns Next's empty 405, not the JSON error shape.
 - Search is a plain `contains` scan, not indexed.
